@@ -4,17 +4,42 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1️⃣ Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Optional: Cache Buildozer's global directory to speed up subsequent builds
+      # 2️⃣ Cache Buildozer's global directory to speed up future builds
       - name: Cache Buildozer
         uses: actions/cache@v4
         with:
-          path: .buildozer
+          path: ~/.buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
+      # 3️⃣ Dynamically create main.py from your source file
+      - name: Construct main.py
+        run: |
+          set -e
+          PRJ="fulmkartoj"
+          gFILMAM="${PRJ}SW29501103.py"
+          
+          # Check that source file exists
+          if [[ ! -f "$gFILMAM" ]]; then
+            echo "File $gFILMAM not found"
+            exit 1
+          fi
+
+          # Remove existing main.py if it exists
+          rm -f main.py
+
+          # Copy the source file to main.py
+          cp "$gFILMAM" main.py
+          
+          # Optional: print a confirmation
+          echo "Created main.py from $gFILMAM"
+
+      # 4️⃣ Build the APK using Buildozer
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
@@ -22,6 +47,7 @@ jobs:
           command: buildozer android debug
           buildozer_version: stable
 
+      # 5️⃣ Upload the generated APK as an artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

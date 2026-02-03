@@ -1,0 +1,40 @@
+
+{
+  "colors": {
+    "EN": "blue",
+    "EO": "green",
+    "DE": "orange"
+  },
+  "cards": [
+    {"EN":"actually","EO":"fakte","DE":"eigentlich"},
+    {"EN":"although","EO":"kvankam","DE":"obwohl"},
+    {"EN":"always","EO":"ĉiam","DE":"immer"},
+    {"EN":"approximately","EO":"proksimume","DE":"ungefähr"},
+    {"EN":"at all","EO":"entute","DE":"überhaupt"},
+    {"EN":"certainly","EO":"certe","DE":"bestimmt"},
+    {"EN":"done","EO":"preta","DE":"fertig"},
+    {"EN":"during","EO":"dum","DE":"während"},
+    {"EN":"exactly","EO":"ĝuste","DE":"genau"},
+    {"EN":"fortunately/alas","EO":"bedaŭrinde","DE":"leider"},
+    {"EN":"important","EO":"grava","DE":"wichtig"},
+    {"EN":"maybe","EO":"eble","DE":"vielleicht"},
+    {"EN":"mostly","EO":"plejofte","DE":"meistens"},
+    {"EN":"my own","EO":"propra","DE":"eigene"},
+    {"EN":"nevertheless","EO":"tamen","DE":"trotzdem"},
+    {"EN":"otherwise","EO":"alie","DE":"sonst"},
+    {"EN":"probably","EO":"verŝajne","DE":"wahrscheinlich"},
+    {"EN":"quite","EO":"sufiĉe","DE":"ziemlich"},
+    {"EN":"really","EO":"vere","DE":"wirklich"},
+    {"EN":"right away","EO":"tuj","DE":"gleich"},
+    {"EN":"simply","EO":"simple","DE":"einfach"},
+    {"EN":"sometimes","EO":"kelkfoje","DE":"manchmal"},
+    {"EN":"soon","EO":"baldaŭ","DE":"gleich"},
+    {"EN":"so that","EO":"por ke","DE":"damit"},
+    {"EN":"still/after all","EO":"ja","DE":"doch"},
+    {"EN":"then/therefore","EO":"tial","DE":"deshalb"},
+    {"EN":"just/just now","EO":"ĝuste nun","DE":"gerade"},
+    {"EN":"already","EO":"jam","DE":"schon"},
+    {"EN":"just (filler)","EO":"ja","DE":"halt"},
+    {"EN":"My house is your house","EO":"Mia domo estas via domo","DE":"Mein Haus ist dein Haus"}
+  ]
+}

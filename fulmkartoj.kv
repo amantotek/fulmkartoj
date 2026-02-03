@@ -1,0 +1,91 @@
+#:kivy 2.1.0
+#:set FNTSZE "22sp"
+
+<MainScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 5
+        padding: 5
+
+        # =========================
+        # HEADER
+        # =========================
+        Label:
+            id: header_label
+            text: ""
+            size_hint_y: None
+            height: "40dp"
+            font_size: "16sp"
+            bold: True
+            color: 1, 1, 1, 1
+            canvas.before:
+                Color:
+                    rgba: 0.15, 0.15, 0.15, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        # =========================
+        # MAIN CARD AREA
+        # =========================
+        BoxLayout:
+            orientation: "vertical"
+            spacing: 15
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Label:
+                id: lang1
+                text: ""
+                font_size: FNTSZE
+                color: 1, 0.9, 0.2, 1              
+
+            Label:
+                id: lang2
+                text: ""
+                font_size: FNTSZE
+                color: 0.2, 1, 0.9, 1
+             
+            Label:
+                id: lang3
+                text: ""
+                font_size: FNTSZE
+                color: 0.9, 0.4, 1, 1
+                
+            Label:
+                id: pad1
+                text: ""
+                font_size: FNTSZE
+                color: 1, 0.4, 1, 1
+                
+            Label:
+                id: pad2
+                text: ""
+                font_size: FNTSZE
+                color: 1, 0.4, 1, 1
+                
+            Label:
+                id: pad3
+                text: ""
+                font_size: FNTSZE
+                color: 1, 0.4, 1, 1
+
+        # =========================
+        # BUTTONS AT BOTTOM
+        # =========================
+        BoxLayout:
+            size_hint_y: None
+            height: "50dp"
+            spacing: 10
+
+            Button:
+                text: "Rotate"
+                on_press: root.on_rotate()
+
+            Button:
+                text: "Tap to Reveal"
+                on_press: root.on_reveal()
