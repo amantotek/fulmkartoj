@@ -26,7 +26,7 @@ jobs:
         run: |
           set -e
           PRJ="fulmkartoj"
-          gFILMAM="${PRJ}SW29503503.py"
+          gFILMAM="fulmkartojSW29501103.py"
           if [[ ! -f "$gFILMAM" ]]; then
             echo "File $gFILMAM not found"
             exit 1
