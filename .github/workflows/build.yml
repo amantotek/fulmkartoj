@@ -49,6 +49,18 @@ jobs:
           mv cmdline-tools latest
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          
+      - name: Install Autotools & Dev Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            make \
+            gcc \
+            g++
 
       # 6️⃣ Accept SDK licenses & install pinned versions
       - name: Accept Android SDK licenses and install pinned packages
