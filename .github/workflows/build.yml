@@ -39,8 +39,8 @@ jobs:
       - name: Install Python deps
         run: |
           python3 -m pip install --upgrade pip
-          pip install buildozer
-
+          pip install cython wheel setuptools buildozer
+          
       # 5️⃣ Bootstrap Android SDK / NDK / dependencies
       - name: Bootstrap Android SDK
         run: buildozer android debug --sdk
