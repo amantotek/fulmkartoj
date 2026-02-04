@@ -1,8 +1,8 @@
-name: Android Build SW29503503
+name: Android Build SW29503617
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
@@ -10,62 +10,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout Code
+      # 1️⃣ Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Cache Buildozer's global directory to speed up future builds
+      # 2️⃣ Cache Buildozer
       - name: Cache Buildozer
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      # 3️⃣ Dynamically create main.py from your source file
+      # 3️⃣ Construct main.py
       - name: Construct main.py
         run: |
           set -e
-          PRJ="fulmkartoj"
-          gFILMAM="fulmkartojSW29501103.py"
-          if [[ ! -f "$gFILMAM" ]]; then
-            echo "File $gFILMAM not found"
-            exit 1
-          fi
-          rm -f main.py
-          cp "$gFILMAM" main.py
-          echo "Created main.py from $gFILMAM"
-          
-      # 3.5 Accept Android SDK licenses
-      - name: Accept Android SDK licenses
+          SRC="fulmkartojSW29501103.py"
+          [ -f "$SRC" ] || (echo "Missing $SRC" && exit 1)
+          cp "$SRC" main.py
+
+      # 4️⃣ Install system dependencies
+      - name: Install system packages
         run: |
-          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+          sudo apt-get update
+          sudo apt-get install -y \
+            openjdk-17-jdk \
+            unzip \
+            zip \
+            libstdc++6 \
+            libffi-dev \
+            libssl-dev
 
-          # Ensure cmdline-tools exist (Buildozer creates them)
-          if [ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-            echo "sdkmanager not found yet – forcing SDK bootstrap"
-            buildozer android debug --sdk || true
-          fi
-
-          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
-
-
-      # 4️⃣ Install Python dependencies & Buildozer if needed
-      - name: Install Python deps
+      # 5️⃣ Install Python deps + Buildozer
+      - name: Install Python tools
         run: |
           python3 -m pip install --upgrade pip
           pip install cython wheel setuptools buildozer
-          
-      # 5️⃣ Bootstrap Android SDK / NDK / dependencies
-      - name: Bootstrap Android SDK
-        run: buildozer android debug --sdk
 
-      # 6️⃣ Build the APK
+      # 6️⃣ Install Android SDK cmdline-tools
+      - name: Install Android SDK
+        run: |
+          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          cd "$SDK_ROOT/cmdline-tools"
+
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o tools.zip
+          unzip -q tools.zip
+          mv cmdline-tools latest
+          rm tools.zip
+
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+      # 7️⃣ Accept Android licenses
+      - name: Accept Android licenses
+        run: |
+          yes | sdkmanager --licenses
+
+      # 8️⃣ Install required SDK packages
+      - name: Install SDK packages
+        run: |
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;25.2.9519653"
+
+      # 9️⃣ Build APK
       - name: Build APK
-        run: buildozer android debug
+        run: |
+          buildozer android debug
 
-      # 7️⃣ Upload the generated APK as an artifact
+      # 🔟 Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: fulmkartoj-apk
-          path: ./.buildozer/android/platform/build/dists/fulmkartoj/bin/*.apk
+          path: bin/*.apk
