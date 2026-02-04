@@ -1,80 +1,57 @@
-name: Android Build
-# buildSW29503502.yml
-
+name: Android Build SW29503503
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # --- 1️⃣ Checkout repository ---
-      - name: Checkout repo
+      # 1️⃣ Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- 2️⃣ Cache Buildozer data (optional, speeds up future runs) ---
+      # 2️⃣ Cache Buildozer's global directory to speed up future builds
       - name: Cache Buildozer
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      # --- 3️⃣ Create main.py from your source file ---
+      # 3️⃣ Dynamically create main.py from your source file
       - name: Construct main.py
         run: |
           set -e
           PRJ="fulmkartoj"
-          gFILMAM="${PRJ}SW29501103.py"
-          
+          gFILMAM="${PRJ}SW29503503.py"
           if [[ ! -f "$gFILMAM" ]]; then
-            echo "ERROR: source file $gFILMAM not found"
+            echo "File $gFILMAM not found"
             exit 1
           fi
-
           rm -f main.py
           cp "$gFILMAM" main.py
           echo "Created main.py from $gFILMAM"
 
-      # --- 4️⃣ Install system packages ---
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends \
-            python3 python3-pip python3-virtualenv \
-            openjdk-17-jdk \
-            build-essential git zip unzip \
-            libffi-dev libssl-dev libsqlite3-dev libjpeg-dev zlib1g-dev
-
-      # --- 5️⃣ Install Buildozer + Cython ---
-      - name: Install Buildozer
+      # 4️⃣ Install Python dependencies & Buildozer if needed
+      - name: Install Python deps
         run: |
           python3 -m pip install --upgrade pip
-          pip3 install buildozer cython
+          pip install buildozer
 
-      # --- 6️⃣ Trigger SDK installation (first pass) ---
-      - name: Initialise Android SDK
-        run: |
-          # This bootstraps the Android SDK and related tools
-          buildozer android debug || true
+      # 5️⃣ Bootstrap Android SDK / NDK / dependencies
+      - name: Bootstrap Android SDK
+        run: buildozer android debug --sdk
 
-      # --- 7️⃣ Accept SDK licenses ---
-      - name: Accept Android SDK licenses
-        run: |
-          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
-          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+      # 6️⃣ Build the APK
+      - name: Build APK
+        run: buildozer android debug
 
-      # --- 8️⃣ Build the APK ---
-      - name: Build the APK
-        run: |
-          buildozer -v android debug
-
-      # --- 9️⃣ Upload the APK as an artifact ---
+      # 7️⃣ Upload the generated APK as an artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: package
-          path: bin/*.apk
+          name: fulmkartoj-apk
+          path: ./.buildozer/android/platform/build/dists/fulmkartoj/bin/*.apk
