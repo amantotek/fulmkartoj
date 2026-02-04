@@ -1,47 +1,93 @@
-name: Build Android APK
-
+name: Android Build SW29503620
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Allows manual triggering
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Date
-        id: get-date
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # 3️⃣ Clean previous SDK (optional)
+      - name: Clean previous Android SDK
         run: |
-          echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
-        shell: bash
-        
+          rm -rf $HOME/android-sdk
+          rm -rf ~/.buildozer
+
+      # 4️⃣ Install system dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            openjdk-17-jdk \
+            unzip \
+            zip \
+            libstdc++6 \
+            libffi-dev \
+            python3-dev \
+            build-essential
+
+      # 5️⃣ Install Android cmdline-tools
+      - name: Install Android SDK cmdline-tools
+        run: |
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip
+          mv cmdline-tools latest
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+      # 6️⃣ Accept SDK licenses & install pinned versions
+      - name: Accept Android SDK licenses and install pinned packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+      # 7️⃣ Cache Buildozer
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+
+      # 8️⃣ Install Python dependencies & Buildozer
+      - name: Install Buildozer
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install cython wheel setuptools buildozer
+
+      # 9️⃣ Construct main.py from your source
       - name: Construct main.py
         run: |
           gFILMAM="fulmkartojSW29501103.py"
-          test -f "$gFILMAM"
+          if [[ ! -f "$gFILMAM" ]]; then
+            echo "File $gFILMAM not found"
+            exit 1
+          fi
           cp "$gFILMAM" main.py
           echo "Created main.py from $gFILMAM"
 
-      - name: Cache Buildozer vars
-        uses: actions/cache@v4
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}-${{ steps.get-date.outputs.date }}
+      # 🔟 Build APK
+      - name: Build APK
+        run: |
+          buildozer android debug --verbose
 
-      - name: Build with Buildozer
-        uses: kivy/buildozer-action@v1.5.0
-        with:
-          command: buildozer android debug
-          buildozer_version: master
-
-      - name: Upload Artifact
+      # 1️⃣1️⃣ Upload APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: package
-          path: bin/*.apk
+          name: fulmkartoj-apk
+          path: ./.buildozer/android/platform/build/dists/fulmkartoj/bin/*.apk
