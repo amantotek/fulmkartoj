@@ -1,73 +1,78 @@
 name: Android Build
-on: [push, pull_request]
+# buildSW29503502.yml
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
-      - name: Checkout Code
+      # --- 1️⃣ Checkout repository ---
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2️⃣ Cache Buildozer's global directory to speed up future builds
+      # --- 2️⃣ Cache Buildozer data (optional, speeds up future runs) ---
       - name: Cache Buildozer
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
 
-      # 3️⃣ Dynamically create main.py from your source file
+      # --- 3️⃣ Create main.py from your source file ---
       - name: Construct main.py
         run: |
           set -e
           PRJ="fulmkartoj"
           gFILMAM="${PRJ}SW29501103.py"
           
-          # Check that source file exists
           if [[ ! -f "$gFILMAM" ]]; then
-            echo "File $gFILMAM not found"
+            echo "ERROR: source file $gFILMAM not found"
             exit 1
           fi
 
-          # Remove existing main.py if it exists
           rm -f main.py
-
-          # Copy the source file to main.py
           cp "$gFILMAM" main.py
-          
-          # Optional: print a confirmation
           echo "Created main.py from $gFILMAM"
 
-      # 4️⃣ Install system dependencies
+      # --- 4️⃣ Install system packages ---
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y \
-            python3 python3-pip python3-venv \
-            build-essential git zip unzip \
+          sudo apt install -y --no-install-recommends \
+            python3 python3-pip python3-virtualenv \
             openjdk-17-jdk \
-            libffi-dev libssl-dev \
-            libsqlite3-dev libjpeg-dev \
-            zlib1g-dev
+            build-essential git zip unzip \
+            libffi-dev libssl-dev libsqlite3-dev libjpeg-dev zlib1g-dev
 
-      # 5️⃣ Install Buildozer
+      # --- 5️⃣ Install Buildozer + Cython ---
       - name: Install Buildozer
         run: |
-          pip3 install --upgrade pip
+          python3 -m pip install --upgrade pip
           pip3 install buildozer cython
-          
-      # 6️⃣ Accept Android SDK licenses
-      - name: Accept Android licenses
-        run: |
-          yes | sdkmanager --licenses
-          
-      # 7 Build APK
-      - name: Build with Buildozer
-        run: |
-          buildozer android debug
 
-      # 8 Upload the generated APK as an artifact
+      # --- 6️⃣ Trigger SDK installation (first pass) ---
+      - name: Initialise Android SDK
+        run: |
+          # This bootstraps the Android SDK and related tools
+          buildozer android debug || true
+
+      # --- 7️⃣ Accept SDK licenses ---
+      - name: Accept Android SDK licenses
+        run: |
+          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+
+      # --- 8️⃣ Build the APK ---
+      - name: Build the APK
+        run: |
+          buildozer -v android debug
+
+      # --- 9️⃣ Upload the APK as an artifact ---
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
