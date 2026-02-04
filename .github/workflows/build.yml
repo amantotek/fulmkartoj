@@ -1,8 +1,7 @@
-name: Android Build SW29503617
-
+name: Android Build SW29503618
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -14,23 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Cache Buildozer
-      - name: Cache Buildozer
-        uses: actions/cache@v4
+      # 2️⃣ Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: ~/.buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          python-version: "3.10"
 
-      # 3️⃣ Construct main.py
-      - name: Construct main.py
-        run: |
-          set -e
-          SRC="fulmkartojSW29501103.py"
-          [ -f "$SRC" ] || (echo "Missing $SRC" && exit 1)
-          cp "$SRC" main.py
-
-      # 4️⃣ Install system dependencies
-      - name: Install system packages
+      # 3️⃣ System deps
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -38,42 +28,47 @@ jobs:
             unzip \
             zip \
             libstdc++6 \
-            libffi-dev \
-            libssl-dev
+            libffi-dev
 
-      # 5️⃣ Install Python deps + Buildozer
-      - name: Install Python tools
+      # 4️⃣ Install Android cmdline-tools (THIS IS THE FIX)
+      - name: Install Android SDK cmdline-tools
         run: |
-          python3 -m pip install --upgrade pip
-          pip install cython wheel setuptools buildozer
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
 
-      # 6️⃣ Install Android SDK cmdline-tools
-      - name: Install Android SDK
-        run: |
-          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_ROOT/cmdline-tools"
-          cd "$SDK_ROOT/cmdline-tools"
-
-          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o tools.zip
-          unzip -q tools.zip
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip
           mv cmdline-tools latest
-          rm tools.zip
 
-          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
-      # 7️⃣ Accept Android licenses
+      # 5️⃣ Accept licenses
       - name: Accept Android licenses
         run: |
           yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-      # 8️⃣ Install required SDK packages
-      - name: Install SDK packages
+      # 6️⃣ Cache buildozer
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+
+      # 7️⃣ Python deps
+      - name: Install Buildozer
         run: |
-          sdkmanager \
-            "platform-tools" \
-            "platforms;android-36" \
-            "build-tools;36.0.0" \
-            "ndk;25.2.9519653"
+          pip install --upgrade pip
+          pip install cython wheel setuptools buildozer
+
+      # 8️⃣ Construct main.py
+      - name: Construct main.py
+        run: |
+          gFILMAM="fulmkartojSW29501103.py"
+          test -f "$gFILMAM"
+          cp "$gFILMAM" main.py
 
       # 9️⃣ Build APK
       - name: Build APK
