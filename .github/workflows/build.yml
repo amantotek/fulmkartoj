@@ -34,6 +34,7 @@ jobs:
             zip \
             libstdc++6 \
             libffi-dev \
+            libltdl-dev \
             autoconf \
             automake \
             libtool \
