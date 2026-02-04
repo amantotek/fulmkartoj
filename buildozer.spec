@@ -15,10 +15,11 @@ android.archs = arm64-v8a, armeabi-v7a
 android.accept_sdk_license = True
 android.api = 33
 android.minapi = 21
-android.build_tools_version = 33.0.2
 
 # Prevent GitHub Buildozer from “helpfully” choosing 36.x
 android.ndk = 25b
+
+p4a.extra_args = --no-libffi
 
 [buildozer]
 log_level = 2
