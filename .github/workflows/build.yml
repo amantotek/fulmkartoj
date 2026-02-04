@@ -41,7 +41,7 @@ jobs:
 
       # 4️⃣ Build the APK using Buildozer
       - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
+        uses: kivy/buildozer-action@v1
         with:
           command: buildozer android debug
 
