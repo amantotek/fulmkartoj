@@ -5,23 +5,26 @@ package.domain = org.fulmkartoj
 source.dir = .
 source.include_exts = py,png,jpg,kv,json
 version = 0.1
-#requirements = python3,kivy
+
 requirements = python3,kivy,pyjnius==1.4.2
+
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
 android.add_assets = vocab.json
-#android.archs = arm64-v8a, armeabi-v7a
+
+# Single-arch for stability
 android.archs = arm64-v8a
 
 android.accept_sdk_license = True
 android.api = 33
 android.minapi = 21
 
-# Prevent GitHub Buildozer from “helpfully” choosing 36.x
+# Lock NDK (critical for CI reproducibility)
 android.ndk = 25b
 
-p4a.extra_args = --no-libffi
+# Disable Unix-only Python modules not supported by Android
+p4a.extra_args = --disable-modules=grp,pwd
 
 [buildozer]
 log_level = 2
