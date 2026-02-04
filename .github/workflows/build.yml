@@ -34,6 +34,20 @@ jobs:
           rm -f main.py
           cp "$gFILMAM" main.py
           echo "Created main.py from $gFILMAM"
+          
+      # 3.5 Accept Android SDK licenses
+      - name: Accept Android SDK licenses
+        run: |
+          SDK_ROOT="$HOME/.buildozer/android/platform/android-sdk"
+
+          # Ensure cmdline-tools exist (Buildozer creates them)
+          if [ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "sdkmanager not found yet – forcing SDK bootstrap"
+            buildozer android debug --sdk || true
+          fi
+
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+
 
       # 4️⃣ Install Python dependencies & Buildozer if needed
       - name: Install Python deps
