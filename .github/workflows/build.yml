@@ -27,11 +27,17 @@ jobs:
             git \
             zip \
             unzip \
-            openjdk-17-jdk \
             libstdc++6 \
             libffi-dev \
             libssl-dev \
             python3-dev
+            
+      - name: Install Java 11
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-11-jdk
+          echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> $GITHUB_ENV
+          echo "/usr/lib/jvm/java-11-openjdk-amd64/bin" >> $GITHUB_PATH
 
       - name: Install Buildozer and Cython
         run: |
