@@ -1,0 +1,19 @@
+# .gitignore
+
+# Python
+__pycache__/
+*.pyc
+
+# Buildozer / Android
+.buildozer/
+*.apk
+*.aab
+
+# Archives
+*.zip
+
+# Local environments
+venv/
+
+# Local archive / history
+archive/

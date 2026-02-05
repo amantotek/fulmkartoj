@@ -9,7 +9,6 @@ version = 0.1
 #requirements = python3,kivy,pyjnius==1.4.2
 requirements = python3,kivy,pyjnius==1.6.1
 
-
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
@@ -24,9 +23,6 @@ android.minapi = 21
 
 # Lock NDK (critical for CI reproducibility)
 android.ndk = 25b
-
-# Disable Unix-only Python modules not supported by Android
-#p4a.extra_args = --disable-modules=grp,pwd
 
 [buildozer]
 log_level = 2
