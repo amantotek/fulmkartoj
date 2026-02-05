@@ -14,8 +14,8 @@ fullscreen = 0
 android.permissions = INTERNET
 android.add_assets = vocab.json
 
-# Single-arch for stability
-android.archs = arm64-v8a
+# 64 then 32 bit 
+android.archs = arm64-v8a, armeabi-v7a
 
 android.accept_sdk_license = True
 android.api = 33
