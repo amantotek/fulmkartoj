@@ -42,10 +42,6 @@ jobs:
         run: |
           mkdir -p ~/.android
           echo "count=0" > ~/.android/repositories.cfg
-          
-      - name: Make gradlew executable
-        run: |
-          chmod +x .buildozer/android/platform/build-arm64-v8a/dists/fulmkartoj/gradlew
 
       - name: Build APK
         env:
