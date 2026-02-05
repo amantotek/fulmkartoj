@@ -1,93 +1,55 @@
-name: Android Build SW29503737
+name: Android APK build SW29504742
+
 on:
   push:
     branches: [ main ]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout code
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      # 3️⃣ Clean Buildozer Android SDK
-      - name: Clean Buildozer Android SDK
-        run: rm -rf ~/.buildozer/android/platform/android-sdk
-
-      # 4️⃣ Install system dependencies
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config m4 libtool-bin
           sudo apt-get install -y \
-            openjdk-17-jdk \
-            unzip \
+            build-essential \
+            ccache \
+            git \
             zip \
+            unzip \
+            openjdk-17-jdk \
             libstdc++6 \
             libffi-dev \
-            libltdl-dev \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config \
-            make \
-            gcc \
-            g++
+            libssl-dev \
+            python3-dev
 
-      # 5️⃣ Install Android SDK cmdline-tools
-      - name: Install Android SDK cmdline-tools
+      - name: Install Buildozer and Cython
         run: |
-          export ANDROID_SDK_ROOT="$HOME/android-sdk"
-          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-          cd "$ANDROID_SDK_ROOT/cmdline-tools"
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q commandlinetools-linux-11076708_latest.zip
-          mv cmdline-tools latest
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          python -m pip install --upgrade pip
+          pip install buildozer cython==0.29.36
 
-      # 6️⃣ Accept Android licenses
-      - name: Accept Android licenses
+      - name: Accept Android SDK licenses
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          mkdir -p ~/.android
+          echo "count=0" > ~/.android/repositories.cfg
 
-      # 7️⃣ Cache Buildozer
-      - name: Cache Buildozer
-        uses: actions/cache@v4
-        with:
-          path: ~/.buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-
-      # 8️⃣ Install Python deps including Buildozer
-      - name: Install Python deps
-        run: |
-          pip install --upgrade pip
-          pip install cython wheel setuptools buildozer
-
-      # 9️⃣ Construct main.py
-      - name: Construct main.py
-        run: |
-          gFILMAM="fulmkartojSW29501103.py"
-          test -f "$gFILMAM" || (echo "$gFILMAM not found" && exit 1)
-          cp "$gFILMAM" main.py
-          echo "Created main.py from $gFILMAM"
-
-      # 🔟 Build APK
       - name: Build APK
-        run: buildozer android debug
+        env:
+          ANDROID_HOME: ${{ runner.temp }}/android-sdk
+        run: |
+          buildozer android debug
 
-      # 1️⃣1️⃣ Upload APK
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: fulmkartoj-apk
