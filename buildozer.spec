@@ -26,7 +26,7 @@ android.minapi = 21
 android.ndk = 25b
 
 # Disable Unix-only Python modules not supported by Android
-p4a.extra_args = --disable-modules=grp,pwd
+#p4a.extra_args = --disable-modules=grp,pwd
 
 [buildozer]
 log_level = 2
